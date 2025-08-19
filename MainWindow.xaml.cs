@@ -168,8 +168,11 @@ namespace Timer
 
             stopwatchTimer.Stop();
 
-            // 添加到历史记录
+            // 计算最终耗时，避免因最后一次 Tick 未触发导致的时间误差
             var endTime = DateTime.Now;
+            stopwatchElapsed = endTime.Subtract(stopwatchStartTime);
+
+            // 添加到历史记录
             var duration = stopwatchElapsed;
             AddToHistory("计时", stopwatchStartTime, endTime, duration);
 
@@ -358,8 +361,15 @@ namespace Timer
 
             countdownTimer.Stop();
 
-            // 添加到历史记录
+            // 在停止时刷新剩余时间，确保记录的持续时间精确
             var endTime = DateTime.Now;
+            countdownRemaining = countdownEndTime.Subtract(endTime);
+            if (countdownRemaining.TotalSeconds < 0)
+            {
+                countdownRemaining = TimeSpan.Zero;
+            }
+
+            // 添加到历史记录
             var actualDuration = countdownOriginal.Subtract(countdownRemaining);
             AddToHistory("倒计时", countdownStartTime, endTime, actualDuration, "", countdownOriginal);
 
